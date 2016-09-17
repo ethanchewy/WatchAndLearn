@@ -12,21 +12,20 @@
     <a id="back-button" href="javascript:history.back()">Go Back</a>
     <div id="video" class="videoContainer"></div>
     <div id="infoContainer">
-    <p id="captions"></p>
+    <div id="captions"></div>
     <!--<div id="player"></div>-->
     <script>
 
       // OUR CODE
       function makeItToASpan(){
         console.log("make_span");
-        $('p').each(function() {
+        $('p a').each(function() {
             var $this = $(this);
-            console.log($this);
             $this.html($this.text().replace(/\b(\w+)\b/g, "<span>$1</span>"));
         });
 
-        $('p span').on('click',function(){
-        $('p span').css('background-color','transparent');
+        $('p a span').on('click',function(){
+        $('p a span').css('background-color','transparent');
            $(this).css('background-color','#ffff66');
            queryDictionary($(this).text())
         });
@@ -40,7 +39,7 @@
       jsonObj = x2js.xml_str2json( this.responseText );
       array_length = jsonObj.transcript.text.length;
       for (i = 0; i < array_length;i++){
-        total_caption = total_caption + "<a name=" + jsonObj.transcript.text[i]._start + " >" + jsonObj.transcript.text[i].__text + "</a>"+"<br>";
+        total_caption = total_caption + "<a name=\"" + jsonObj.transcript.text[i]._start +"\""+ " href=javascript:seekTo("+  jsonObj.transcript.text[i]._start +");"+ ">" + jsonObj.transcript.text[i].__text + "</a>"+"<br>";
         console.log(total_caption);
       }
       console.log(total_caption);
@@ -220,7 +219,7 @@
                     }
 
                     if (time > 0 && scrollToTimePosition != time) {
-                        var anchor = $(containerSelector + "  a[name=" + time + "]");
+                        var anchor = $(containerSelector + " a[name=" + time + "]");
                         if (anchor.length) {
                             scrollToTimePosition = time;
                             var scrollTarget = anchor.data('absoluteDistanceFromTop') - container.offset().top;
