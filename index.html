@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Learn a Language!</title>
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="font-awesome-4.6.3/css/font-awesome.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script src="js/xml2json.min.js"></script>
+<script src="js/script.js"></script>
+<link href='https://fonts.googleapis.com/css?family=Ubuntu|Poiret+One|Roboto+Condensed|Raleway|Muli|Quicksand' rel='stylesheet' type='text/css'>
+</head>
+<body>
+  <div id="navbar">
+    <nav>
+      <div class="companyInfo">
+        <i class="fa fa-language fa-2x" aria-hidden="true"></i>
+        <h1 class="companyName">Watch N Learn</h1>
+      </div>
+      <div class="searchForm">
+        <!-- <h1>HELLO</h1> -->
+        <form id="search-form" name="search-form" onsubmit="return search()">
+          <div class="fieldcontainer">
+            <input type="search" id="query" class="search-field" placeholder="Search YouTube...">
+            <input type="submit" name="search-btn" id="search-btn" value="">
+          </div>
+        </form>
+      </div>
+    </nav>
+  </div>
+  <div id="behindElement"></div>
+  <div id="content">
+    <ul id="results"></ul>
+    <div id="buttons"></div>
+  </div>
+</body>
+</html>
