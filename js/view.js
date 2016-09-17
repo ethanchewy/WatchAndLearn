@@ -1,9 +1,12 @@
+
 $(document).ready(function() {
-    var videoId = parent.document.URL.substring(parent.document.URL.indexOf('?videoId=') + 9, parent.document.URL.length);
+    var videoId = parent.document.URL.substring(parent.document.URL.indexOf('?videoId=') + 9, parent.document.URL.indexOf('?videoId=') + 20);
     var videoHTML = getVideoHTML(videoId);
     calcWidth();
     $("#video").append(videoHTML);
-    queryDictionary('date');
+    //retrieveCaptions();
+    console.log("VIDE0_ID " + videoId);
+    retrieveCaptions(videoId);
 });
 
 function getVideoHTML(videoId) {
@@ -11,6 +14,25 @@ function getVideoHTML(videoId) {
     return html;
 }
 
+
+
+function reqListener () {
+  x2js = new X2JS();
+  jsonObj = x2js.xml_str2json( this.responseText );
+  //filtered_data = JSON.parse(jsonObj);
+    console.log(jsonObj);
+}
+function retrieveCaptions(videoId){
+
+var x2js,
+  jsonObj,
+  filtered_data;
+var oReq = new XMLHttpRequest();
+oReq.addEventListener("load", reqListener);
+oReq.open("GET", "https://video.google.com/timedtext?lang=en&v=" + videoId);
+oReq.send();
+//var filtered_data = JSON.parse(jsonObj);
+}
 
 var calcWidth = function() {
     $('#preview-frame').width($('#video').width());
