@@ -4,11 +4,23 @@ $(document).ready(function() {
     var videoHTML = getVideoHTML(videoId);
     calcWidth();
     $("#video").append(videoHTML);
-    //retrieveCaptions();
-    console.log("VIDE0_ID " + videoId);
     retrieveCaptions(videoId);
+    console.log("before_span");
 });
+function makeItToASpan(){
+  console.log("make_span");
+  $('p').each(function() {
+      var $this = $(this);
+      console.log($this);
+      $this.html($this.text().replace(/\b(\w+)\b/g, "<span>$1</span>"));
+  });
 
+    $('p span').on('click',function(){
+    $('p span').css('background-color','transparent');
+       $(this).css('background-color','#ffff66');
+       queryDictionary($(this).text())
+    });
+}
 function getVideoHTML(videoId) {
     var html = "<iframe title='YouTube video player' class='youtube-player' height='100%'id='preview-frame' src='http://www.youtube.com/embed/" + videoId + "'allowFullScreen></iframe>"
     return html;
@@ -18,16 +30,33 @@ function getVideoHTML(videoId) {
 
 function reqListener () {
   x2js = new X2JS();
+  var total_caption = "";
   jsonObj = x2js.xml_str2json( this.responseText );
+  array_length = jsonObj.transcript.text.length;
   //filtered_data = JSON.parse(jsonObj);
-    console.log(jsonObj);
+    // console.log(this.responseText);
+    // console.log(jsonObj);
+    // console.log(jsonObj.length);
+    // console.log(jsonObj.transcript.text.length);
+    /*
+  1. for loop to parse through each object (Obj. 1, 2, 3)
+  2. append each _text property value to a "total" value
+  */
+  for (i = 0; i < array_length;i++){
+    total_caption += jsonObj.transcript.text[i].__text;
+  }
+  //console.log(total_caption);
+  $("#captions").append(total_caption);
+  makeItToASpan();
+
 }
 function retrieveCaptions(videoId){
 
-var x2js,
-  jsonObj,
-  filtered_data;
-var oReq = new XMLHttpRequest();
+  var x2js,
+  	jsonObj,
+  	array_length,
+  	filtered_data;
+    var oReq = new XMLHttpRequest();
 oReq.addEventListener("load", reqListener);
 oReq.open("GET", "https://video.google.com/timedtext?lang=en&v=" + videoId);
 oReq.send();
