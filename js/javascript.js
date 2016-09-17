@@ -12,13 +12,16 @@ function reqListener () {
 	2. append each _text property value to a "total" value
 	*/
 	for (i = 0; i < array_length;i++){
-		console.log(jsonObj.transcript.text[i].__text);
+		total_caption += jsonObj.transcript.text[i].__text;
 	}
+	console.log(total_caption);
+	$("#captions").append(total_caption);
 }
 var x2js,
 	jsonObj,
 	array_length,
-	filtered_data;
+	filtered_data,
+	total_caption;
 var oReq = new XMLHttpRequest();
 //var url = "https://video.google.com/timedtext?lang=en&v=" + searched_url;
 oReq.addEventListener("load", reqListener);
