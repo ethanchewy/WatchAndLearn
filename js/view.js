@@ -5,7 +5,7 @@ $(document).ready(function() {
     calcWidth();
     $("#video").append(videoHTML);
     retrieveCaptions(videoId);
-    console.log("before_span");
+    queryImages("placeholder");
 });
 function makeItToASpan(){
   console.log("make_span");
@@ -72,8 +72,35 @@ $(window).resize(function() {
     calcWidth();
 });
 
+function queryImages(word){
+    var xmlhttp = new XMLHttpRequest();
+    //var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&tags=" + word + "&api_key=ff12a1da05f0667004a7c173cfeab461&per_page=5&format=rest";
+var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&tags=sunshine&sort=relevance&api_key=ff12a1da05f0667004a7c173cfeab461&per_page=5&format=rest";
+    xmlhttp.onreadystatechange = function() {
+     if (this.readyState == 4 && this.status == 200) {
+
+      var x2js = new X2JS();
+      var jsonObj = x2js.xml_str2json( this.responseText );
+      var photos = jsonObj.rsp.photos.photo;
+      var photos_lng = jsonObj.rsp.photos.photo.length;
+      for (i=0; i< photos_lng;i++){
+        var photo = photos[i];
+        console.log(photo);
+        var img_src = "https://farm"+photo["_farm"] + ".staticflickr.com/"+photo["_server"] + "/"+photo["_id"] + "_"+photo["_secret"]+".jpg";
+        console.log(img_src);
+      }
+
+
+   }
+
+  };
+  xmlhttp.open("GET", url, true);
+  xmlhttp.send();
+}
+
 function queryDictionary(word){
   var xmlhttp = new XMLHttpRequest();
+
   var url = "https://crossorigin.me/http://www.dictionaryapi.com/api/v1/references/learners/xml/"+word+"?key=eaf69752-c354-4489-8cc6-99948b85a285";
 
  xmlhttp.onreadystatechange = function() {
