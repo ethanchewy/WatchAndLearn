@@ -21,7 +21,7 @@ var x2js,
 	jsonObj,
 	array_length,
 	filtered_data,
-	total_caption;
+	total_caption="";
 var oReq = new XMLHttpRequest();
 //var url = "https://video.google.com/timedtext?lang=en&v=" + searched_url;
 oReq.addEventListener("load", reqListener);
