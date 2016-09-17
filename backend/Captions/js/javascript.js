@@ -4,6 +4,12 @@ function reqListener () {
 	//filtered_data = JSON.parse(jsonObj);
   	console.log(this.responseText);
   	console.log(jsonObj);
+  	console.log(jsonObj.transcript);
+  	/*
+  	$.each(jsonObj.transcript, function(i, v) {
+	    console.log(v.__text);
+	});
+	*/
 }
 var x2js,
 	jsonObj,
@@ -14,3 +20,4 @@ oReq.addEventListener("load", reqListener);
 oReq.open("GET", "https://video.google.com/timedtext?lang=en&v=apbSsILLh28");
 oReq.send();
 //var filtered_data = JSON.parse(jsonObj);
+
