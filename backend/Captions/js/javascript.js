@@ -6,9 +6,8 @@ function reqListener () {
   	console.log(jsonObj);
   	console.log(jsonObj.transcript);
   	/*
-  	$.each(jsonObj.transcript, function(i, v) {
-	    console.log(v.__text);
-	});
+	1. for loop to parse through each object (Obj. 1, 2, 3)
+	2. append each _text property value to a "total" value
 	*/
 }
 var x2js,
