@@ -1,12 +1,37 @@
-
 $(document).ready(function() {
+    //console.log(YTPlayer.getCurrentTime());
+    /*
     var videoId = parent.document.URL.substring(parent.document.URL.indexOf('?videoId=') + 9, parent.document.URL.indexOf('?videoId=') + 20);
     var videoHTML = getVideoHTML(videoId);
     calcWidth();
     $("#video").append(videoHTML);
     retrieveCaptions(videoId);
     queryImages("placeholder");
+  */
+    //fetchTime();
+
 });
+  var ytplayer;
+
+  function onYouTubePlayerAPIReady() {
+    ytplayer = new YT.Player('player', {
+    height: '390',
+    width: '640',
+    videoId: 'M7lc1UVf-VE',
+    events: {
+      //'onReady': onPlayerReady,
+      //'onStateChange': onPlayerStateChange
+    }});
+    var time = ytplayer.getCurrentTime();
+    alert(time);
+  }
+  
+  
+
+  
+  
+
+
 function makeItToASpan(){
   console.log("make_span");
   $('p').each(function() {
