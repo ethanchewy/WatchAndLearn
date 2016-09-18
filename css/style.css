@@ -236,6 +236,8 @@ nav .searchForm{
 #video{
   float: left;
   box-sizing:border-box;
+  width:40%;
+  padding:0;
   margin:150px 0px 10px 20px;
   -webkit-box-shadow: 10px 10px 21px -6px rgba(207,207,207,1);
   -moz-box-shadow: 10px 10px 21px -6px rgba(207,207,207,1);
@@ -250,7 +252,8 @@ nav .searchForm{
 #infoContainer{
   float: left;
   padding: 20px 25px 20px;
-  margin:100px 0px 20px 10px;
+  margin:100px 0px 20px 220px;
+  width:40%;
   background-color: #fff;
   box-sizing:border-box;
   overflow-y: auto;
