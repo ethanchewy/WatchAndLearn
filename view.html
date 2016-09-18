@@ -8,7 +8,9 @@
   <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Lobster" />
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
   <script src="js/xml2json.min.js"></script>
-  <script src="js/view.js"></script>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
@@ -24,16 +26,55 @@
       function makeItToASpan(){
         $('div a').each(function() {
             var $this = $(this);
-            $this.html($this.text().replace(/\b(\w+)\b/g, "<span>$1</span>"));
+            $this.html($this.text().replace(/\b(\w+)\b/g, "<span rel='popover'  data-trigger='hover' data-toggle='popover' data-content=\"<img class='loading'src='img/loading.gif'>\">$1</span>"));
         });
 
-        $('div a span').on('click',function(){
-        $('div a span').css('background-color','transparent');
-           $(this).css('background-color','#ffff66');
-           queryDictionary($(this).text())
-        });
+        // $('p span').each(function(){
+        //      if(wordMap.get($(this).text()) == null){
+        //       queryDictionary($(this).text(),$(this));
+        //     }else{
+        //       var mainDef = wordMap.get($(this).text()).mainDef;
+        //       var pr = wordMap.get($(this).text()).pronounciation;
+        //       var speechPart = wordMap.get($(this).text()).speechPart;;
+        //       var word = $(this.text())
+        //       $(this).attr('data-content', '<div class="popup"><b>'+word+'</b></div>');
+        //     }
+        // });
 
-    }
+
+
+          // $('p span').hover(function(){
+
+          // });
+
+          $('div a span').popover({
+           html: true,
+           trigger: 'manual',
+           container: $(this).attr('id'),
+           placement: 'bottom',
+           content: function () {
+               $return = '<div class="hover-hovercard"></div>';
+           }
+       }).on("mouseenter", function () {
+           var _this = this;
+           $(this).popover("show");
+           $('div a span').css('background-color','transparent');
+              $(this).css('background-color','#ffff66');
+              //if(wordMap.get($(this).text()) == null){
+               queryDictionary($(this).text(),$(this));
+             //}
+           $(this).siblings(".popover").on("mouseleave", function () {
+               $(_this).popover('hide');
+           });
+       }).on("mouseleave", function () {
+           var _this = this;
+           setTimeout(function () {
+               if (!$(".popover:hover").length) {
+                   $(_this).popover("hide")
+               }
+           }, 100);
+       });
+      }
 
 
 
@@ -50,10 +91,7 @@
 
       makeItToASpan();
       
-      var myElement = document.getElementById('152.13');
-      var topPos = myElement.offsetTop;
-      document.getElementById('infoContainer').scrollTop = topPos;
-      alert("sdf");
+       $('[data-toggle="popover"]').popover({html:true});
 
     }
     function retrieveCaptions(videoId){
@@ -102,33 +140,49 @@
       xmlhttp.send();
     }
 
-    function queryDictionary(word){
+    function queryDictionary(word,currentElement){
       var xmlhttp = new XMLHttpRequest();
 
       var url = "https://crossorigin.me/http://www.dictionaryapi.com/api/v1/references/learners/xml/"+word+"?key=eaf69752-c354-4489-8cc6-99948b85a285";
 
      xmlhttp.onreadystatechange = function() {
-         if (this.readyState == 4 && this.status == 200) {
-             var x2js = new X2JS();
-             var jsonObj = x2js.xml_str2json( this.responseText );
-             if(jsonObj.entry_list.entry)
-             var audioFile = jsonObj.entry_list.entry.sound?jsonObj.entry_list.entry.sound.wav:jsonObj.entry_list.entry[0].sound.wav;
-             var subDirectory = "";
-             if(audioFile.indexOf('bix') == 0){
-               subDirectory = "bix";
-             }else if (audioFile.indexOf('gg') == 0){
-               subDirectory = "gg";
-             }else if (/^\d\w/g.exec(audioFile) != null){
-               subDirectory="number";
-             }else{
-               subDirectory = audioFile[0];
-             }
-             var path =  "http://media.merriam-webster.com/soundc11/"+subDirectory.toLowerCase()+"/"+audioFile;
-          var audioElement = document.createElement('audio');
-          audioElement.setAttribute('src', path);
-          audioElement.play();
+       if (this.readyState == 4 && this.status == 200) {
+           var x2js = new X2JS();
+           var jsonObj = x2js.xml_str2json( this.responseText );
+           if(jsonObj.entry_list.entry){
+           var audioFile = jsonObj.entry_list.entry[0]?(jsonObj.entry_list.entry[0].sound?jsonObj.entry_list.entry[0].sound.wav:null):(jsonObj.entry_list.entry.sound?jsonObj.entry_list.entry.sound.wav:null);//null;//jsonObj.entry_list.entry[0]?(jsonObj.entry_list.entry.sound?jsonObj.entry_list.entry.sound.wav:jsonObj.entry_list.entry[0].sound.wav):jsonObj.entry_list.entry.sound.wav;
+           var subDirectory = "";
+           if(audioFile){
+           if(audioFile.indexOf('bix') == 0){
+             subDirectory = "bix";
+           }else if (audioFile.indexOf('gg') == 0){
+             subDirectory = "gg";
+           }else if (/^\d\w/g.exec(audioFile) != null){
+             subDirectory="number";
+           }else{
+             subDirectory = audioFile[0];
+           }
          }
-     };
+       }else{
+         //console.warn(word);
+       }
+          if(subDirectory)
+           var path =  "http://media.merriam-webster.com/soundc11/"+subDirectory.toLowerCase()+"/"+audioFile;
+        // var audioElement = document.createElement('audio');
+        // audioElement.setAttribute('src', path);
+        // audioElement.play()
+        var mapObject = {
+          'sound':path,
+          'pronounciation':jsonObj.entry_list.entry?(jsonObj.entry_list.entry[0]?jsonObj.entry_list.entry[0].pr:jsonObj.entry_list.entry.pr):'',
+          'speechPart':jsonObj.entry_list.entry?(jsonObj.entry_list.entry[0]?jsonObj.entry_list.entry[0].fl:jsonObj.entry_list.entry.fl):'',
+          'mainDef':jsonObj.entry_list.entry?(jsonObj.entry_list.entry[0]?(jsonObj.entry_list.entry[0].def.dt[0]?(jsonObj.entry_list.entry[0].def?(jsonObj.entry_list.entry[0].def.dt[0].__text):jsonObj.entry_list.entry[1].def.dt[0].un.__text):(jsonObj.entry_list.entry[0].def.dt.__text)):(jsonObj.entry_list.entry.def.dt.__text)):'',
+          'word':word
+        };
+        //wordMap.set(word,mapObject);
+        $(currentElement).attr('data-content', '<div class="popup"><b>'+word+' | <span class="grey">'+mapObject.pronounciation+'</span> <span class="speechPart">&nbsp;'+mapObject.speechPart+'&nbsp;&nbsp;<i data-sound="'+path+'"class="fa fa-volume-up test" aria-hidden="true"></i></span></b><br/>&nbsp;&bull;&nbsp;<span class="definition">'+(mapObject.mainDef!=undefined?(mapObject.mainDef.split(':')[1]):null)+'</span></div>');
+
+       }
+   };
      xmlhttp.open("GET", url, true);
      xmlhttp.send();
     }
@@ -262,6 +316,11 @@
     calcWidth();
     retrieveCaptions(videoIdnmbr);
     queryImages("placeholder");
+    $(document).on("click", "i", function() {
+      var audioElement = document.createElement('audio');
+      audioElement.setAttribute('src', $(this).data("sound"));
+      audioElement.play()
+    });
     </script>
 
 
