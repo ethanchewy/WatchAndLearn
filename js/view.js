@@ -75,9 +75,6 @@ function reqListener () {
 function retrieveCaptions(videoId){
 
   var x2js,
-  	jsonObj,
-  	array_length,
-  	filtered_data;
     var oReq = new XMLHttpRequest();
 oReq.addEventListener("load", reqListener);
 oReq.open("GET", "https://video.google.com/timedtext?lang=en&v=" + videoId);

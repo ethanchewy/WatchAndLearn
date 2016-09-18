@@ -15,7 +15,7 @@ $(document).ready(function(){
 
 
 function search(){
-  console.log('search bar ');
+  //console.log('search bar ');
 	// Clear Results
 	$('#results').html('');
 	$('#buttons').html('');
@@ -35,7 +35,7 @@ function search(){
 				var prevPageToken = data.prevPageToken;
 
 				// Log Data
-				console.log(data);
+				//console.log(data);
 
 				$.each(data.items, function(i, item){
 					// Get Output
@@ -109,7 +109,7 @@ function nextPage(){
 				var prevPageToken = data.prevPageToken;
 
 				// Log Data
-				console.log(data);
+				//console.log(data);
 
 				$.each(data.items, function(i, item){
 					// Get Output
@@ -153,7 +153,7 @@ function prevPage(){
 				var prevPageToken = data.prevPageToken;
 
 				// Log Data
-				console.log(data);
+				//console.log(data);
 
 				$.each(data.items, function(i, item){
 					// Get Output
