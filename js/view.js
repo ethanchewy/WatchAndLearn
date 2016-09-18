@@ -179,7 +179,7 @@ function queryDictionary(word, currentElement){
         'word':word
       };
       wordMap.set(word,mapObject);
-      $(currentElement).attr('data-content', '<div class="popup"><b>'+word+' | <span class="grey">'+mapObject.pronounciation+'</span> <span class="speechPart">&nbsp;'+mapObject.speechPart+'&nbsp;&nbsp;<i data-sound="'+path+'"class="fa fa-volume-up test" aria-hidden="true"></i></span></b><br/>&nbsp;&bull;&nbsp;<span class="definition">'+(mapObject.mainDef!=undefined?(mapObject.mainDef.split(':')[1]):null)+'</span></div>');
+      $(currentElement).attr('data-content', '<div class="popup"><b>'+word+'<span class="grey"> |&nbsp;'+(mapObject.pronounciation==''?'':mapObject.pronounciation)+'</span> <span class="speechPart">&nbsp;'+mapObject.speechPart+'&nbsp;&nbsp;<i data-sound="'+path+'"class="fa fa-volume-up test" aria-hidden="true"></i></span></b><br/>&nbsp;&bull;&nbsp;<span class="definition">'+(mapObject.mainDef!=undefined?(mapObject.mainDef.split(':')[1]):null)+'</span></div>');
 
      }
  };
