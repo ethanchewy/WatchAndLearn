@@ -15,7 +15,7 @@ A:hover{
   color:#306199;
 }
 body{
-  background-color: #ecf0f1;
+  background-color: #ecf0f1 !important;
   font-family: 'Raleway', sans-serif;
 }
 #navbar{
@@ -79,7 +79,6 @@ nav .searchForm{
   width: 55%;
   height: 40px;
   /*border: 2px solid black;*/
-  margin-left: 40%;
   margin-top: 23px;
 }
 
@@ -93,7 +92,7 @@ nav .searchForm{
 	position:relative;
 	width:90%;
 	margin:0 auto;
-  margin-top: 15px;
+  margin-top: 13%;
 
 }
 
@@ -103,8 +102,7 @@ nav .searchForm{
 	box-sizing:border-box;
 	display:block;
 	width:100%;
-  margin-left: 5%;
-  height: 5vh;
+  height: 12vh;
 	padding:11px 7px;
 	padding-right:43px;
 	background:#fff;
@@ -125,12 +123,12 @@ nav .searchForm{
 
 #search-btn{
 	position:absolute;
-	right:-20px;
+	right:11px;
   /*border: 1px solid red;*/
   border: 0;
-	top:5px;
-	height:26px;
-	width:26px;
+	top:15px;
+	height:40px;
+	width:40px;
 	cursor:pointer;
 	filter:alpha(opacity=65);
 	opacity:0.65;
