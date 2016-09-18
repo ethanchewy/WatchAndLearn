@@ -140,7 +140,7 @@ var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&tag
 
         //console.log(photo);
         var img_src = "https://farm"+photo["_farm"] + ".staticflickr.com/"+photo["_server"] + "/"+photo["_id"] + "_"+photo["_secret"]+".jpg";
-        var img_tag = "<img src='"+img_src+"' height='200' width='200'>";
+        var img_tag = "<img class='popup_img' src='"+img_src+"'>";
         $('.popup').append(img_tag);
 
       }
@@ -153,10 +153,9 @@ var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&tag
 
 
 function queryTranslation(word){
-  console.log("ENTERED_TRANSLATION");
    var xmlhttp = new XMLHttpRequest();
+
    //replace the destination language with user's native language
-   
    var url = "https://translate.yandex.net/api/v1.5/tr.json/translate?key=trnsl.1.1.20160917T195632Z.2f34ef1b4e3cda55.b0ee170e6af547187486da49007ce5d938ddbe78&text="+word+"&lang=es";
 
    xmlhttp.onreadystatechange = function() {
@@ -169,7 +168,7 @@ function queryTranslation(word){
         var jsonObj = JSON.parse(this.responseText);
         var text = jsonObj.text
 
-        $('.translation').text(text);
+        $('.translation').text("es ("+ text + ")");
      }
      else{
 
