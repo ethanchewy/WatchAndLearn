@@ -16,7 +16,7 @@
 </head>
 <body>
   <div id="mainContainer">
-    <a id="back-button" href="javascript:history.back()">Go Back</a>
+    <a id="back-button" href="index.html">Go Back</a>
     <div id="video" class="container"></div>
     <div id="infoContainer">
     <div id="captions"></div>
@@ -25,7 +25,7 @@
 
       // OUR CODE
       function makeItToASpan(){
-        $('div a').each(function() {
+        $('#captions a').each(function() {
             var $this = $(this);
             $this.html($this.text().replace(/\b(\w+)\b/g, "<span rel='popover'  data-trigger='hover' data-toggle='popover' data-content=\"<img class='loading'src='img/loading.gif'>\">$1</span>"));
         });
@@ -48,7 +48,7 @@
 
           // });
 
-          $('div a span').popover({
+          $('#captions a span').popover({
            html: true,
            trigger: 'manual',
            container: $(this).attr('id'),
@@ -58,8 +58,9 @@
            }
        }).on("mouseenter", function () {
            var _this = this;
+            $('#captions a span').popover('hide');
            $(this).popover("show");
-           $('div a span').css('background-color','transparent');
+           $('#captions a span').css('background-color','transparent');
               $(this).css('background-color','#ffff66');
               //if(wordMap.get($(this).text()) == null){
                queryDictionary($(this).text(),$(this));
@@ -91,7 +92,7 @@
 
 
       makeItToASpan();
-      
+
        $('[data-toggle="popover"]').popover({html:true});
 
     }
@@ -179,8 +180,11 @@
           'mainDef':jsonObj.entry_list.entry?(jsonObj.entry_list.entry[0]?(jsonObj.entry_list.entry[0].def.dt[0]?(jsonObj.entry_list.entry[0].def?(jsonObj.entry_list.entry[0].def.dt[0].__text):jsonObj.entry_list.entry[1].def.dt[0].un.__text):(jsonObj.entry_list.entry[0].def.dt.__text)):(jsonObj.entry_list.entry.def.dt.__text)):'',
           'word':word
         };
+        var html = '<div class="popup"><b>'+word+' | <span class="grey">'+(mapObject.pronounciation==undefined?'':mapObject.pronounciation)+'</span> <span class="speechPart">&nbsp;'+mapObject.speechPart+'&nbsp;&nbsp;<i data-sound="'+path+'"class="fa fa-volume-up test" aria-hidden="true"></i></span></b><br/>&nbsp;&nbsp;<span class="definition">'+(mapObject.mainDef!=null?('&bull;&nbsp;'+mapObject.mainDef.split(':')[1]):'No Definition Available')+'</span></div>';
         //wordMap.set(word,mapObject);
-        $(currentElement).attr('data-content', '<div class="popup"><b>'+word+' | <span class="grey">'+mapObject.pronounciation+'</span> <span class="speechPart">&nbsp;'+mapObject.speechPart+'&nbsp;&nbsp;<i data-sound="'+path+'"class="fa fa-volume-up test" aria-hidden="true"></i></span></b><br/>&nbsp;&bull;&nbsp;<span class="definition">'+(mapObject.mainDef!=undefined?(mapObject.mainDef.split(':')[1]):null)+'</span></div>');
+        $(currentElement).attr('data-content', html);
+        $(currentElement).popover("show");
+
 
        }
    };
@@ -227,7 +231,7 @@
           player = new YT.Player('video', {
               height: '360',
               width: '640',
-              videoId: videoIdnmbr, 
+              videoId: videoIdnmbr,
               events: {
                   'onReady': onPlayerReady
                       //'onStateChange': onPlayerStateChange
@@ -312,12 +316,13 @@
         prepareAnchors();
         scroll();
     };
-            
+
 
     calcWidth();
     retrieveCaptions(videoIdnmbr);
     queryImages("placeholder");
-    $(document).on("click", "i", function() {
+    $(document).on("click", "i", function(e) {
+      e.preventDefault();
       var audioElement = document.createElement('audio');
       audioElement.setAttribute('src', $(this).data("sound"));
       audioElement.play()
