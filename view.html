@@ -4,19 +4,327 @@
   <title>Watch Video</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="font-awesome-4.6.3/css/font-awesome.min.css">
-  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Lobster" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
   <script src="js/xml2json.min.js"></script>
-  <script src="js/view.js"></script>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
 </head>
 <body>
   <div id="mainContainer">
     <a id="back-button" href="javascript:history.back()">Go Back</a>
-    <div id="video" class="videoContainer"></div>
+    <div id="video" class="container"></div>
     <div id="infoContainer">
-    <p id="captions"></p>
-    </div>
+    <div id="captions"></div>
+    <!--<div id="player"></div>-->
+    <script>
+
+      // OUR CODE
+      function makeItToASpan(){
+        $('div a').each(function() {
+            var $this = $(this);
+            $this.html($this.text().replace(/\b(\w+)\b/g, "<span rel='popover'  data-trigger='hover' data-toggle='popover' data-content=\"<img class='loading'src='img/loading.gif'>\">$1</span>"));
+        });
+
+        // $('p span').each(function(){
+        //      if(wordMap.get($(this).text()) == null){
+        //       queryDictionary($(this).text(),$(this));
+        //     }else{
+        //       var mainDef = wordMap.get($(this).text()).mainDef;
+        //       var pr = wordMap.get($(this).text()).pronounciation;
+        //       var speechPart = wordMap.get($(this).text()).speechPart;;
+        //       var word = $(this.text())
+        //       $(this).attr('data-content', '<div class="popup"><b>'+word+'</b></div>');
+        //     }
+        // });
+
+
+
+          // $('p span').hover(function(){
+
+          // });
+
+          $('div a span').popover({
+           html: true,
+           trigger: 'manual',
+           container: $(this).attr('id'),
+           placement: 'bottom',
+           content: function () {
+               $return = '<div class="hover-hovercard"></div>';
+           }
+       }).on("mouseenter", function () {
+           var _this = this;
+           $(this).popover("show");
+           $('div a span').css('background-color','transparent');
+              $(this).css('background-color','#ffff66');
+              //if(wordMap.get($(this).text()) == null){
+               queryDictionary($(this).text(),$(this));
+             //}
+           $(this).siblings(".popover").on("mouseleave", function () {
+               $(_this).popover('hide');
+           });
+       }).on("mouseleave", function () {
+           var _this = this;
+           setTimeout(function () {
+               if (!$(".popover:hover").length) {
+                   $(_this).popover("hide")
+               }
+           }, 100);
+       });
+      }
+
+
+
+    function reqListener () {
+      x2js = new X2JS();
+      var total_caption = "";
+      jsonObj = x2js.xml_str2json( this.responseText );
+      array_length = jsonObj.transcript.text.length;
+      for (i = 0; i < array_length;i++){
+        total_caption = total_caption + "<a id=\"" + Math.round(jsonObj.transcript.text[i]._start) +"\""+ " href=javascript:seekTo("+   Math.round(jsonObj.transcript.text[i]._start) +");"+ ">" + jsonObj.transcript.text[i].__text + "</a>"+"<br>"+"<br>";
+      }
+      $("#captions").append(total_caption);
+
+
+      makeItToASpan();
+      
+       $('[data-toggle="popover"]').popover({html:true});
+
+    }
+    function retrieveCaptions(videoId){
+
+      var x2js,
+        jsonObj,
+        array_length,
+        filtered_data;
+        var oReq = new XMLHttpRequest();
+    oReq.addEventListener("load", reqListener);
+    oReq.open("GET", "https://video.google.com/timedtext?lang=en&v=" + videoId);
+    oReq.send();
+    //var filtered_data = JSON.parse(jsonObj);
+    }
+
+    var calcWidth = function() {
+        $('#preview-frame').width($('#video').width());
+    }
+    $(window).resize(function() {
+        calcWidth();
+    }).load(function() {
+        calcWidth();
+    });
+
+    function queryImages(word){
+        var xmlhttp = new XMLHttpRequest();
+        //var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&tags=" + word + "&api_key=ff12a1da05f0667004a7c173cfeab461&per_page=5&format=rest";
+    var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&tags=sunshine&sort=relevance&api_key=ff12a1da05f0667004a7c173cfeab461&per_page=5&format=rest";
+        xmlhttp.onreadystatechange = function() {
+         if (this.readyState == 4 && this.status == 200) {
+
+          var x2js = new X2JS();
+          var jsonObj = x2js.xml_str2json( this.responseText );
+          var photos = jsonObj.rsp.photos.photo;
+          var photos_lng = jsonObj.rsp.photos.photo.length;
+          for (i=0; i< photos_lng;i++){
+            var photo = photos[i];
+            var img_src = "https://farm"+photo["_farm"] + ".staticflickr.com/"+photo["_server"] + "/"+photo["_id"] + "_"+photo["_secret"]+".jpg";
+          }
+
+
+       }
+
+      };
+      xmlhttp.open("GET", url, true);
+      xmlhttp.send();
+    }
+
+    function queryDictionary(word,currentElement){
+      var xmlhttp = new XMLHttpRequest();
+
+      var url = "https://crossorigin.me/http://www.dictionaryapi.com/api/v1/references/learners/xml/"+word+"?key=eaf69752-c354-4489-8cc6-99948b85a285";
+
+     xmlhttp.onreadystatechange = function() {
+       if (this.readyState == 4 && this.status == 200) {
+           var x2js = new X2JS();
+           var jsonObj = x2js.xml_str2json( this.responseText );
+           if(jsonObj.entry_list.entry){
+           var audioFile = jsonObj.entry_list.entry[0]?(jsonObj.entry_list.entry[0].sound?jsonObj.entry_list.entry[0].sound.wav:null):(jsonObj.entry_list.entry.sound?jsonObj.entry_list.entry.sound.wav:null);//null;//jsonObj.entry_list.entry[0]?(jsonObj.entry_list.entry.sound?jsonObj.entry_list.entry.sound.wav:jsonObj.entry_list.entry[0].sound.wav):jsonObj.entry_list.entry.sound.wav;
+           var subDirectory = "";
+           if(audioFile){
+           if(audioFile.indexOf('bix') == 0){
+             subDirectory = "bix";
+           }else if (audioFile.indexOf('gg') == 0){
+             subDirectory = "gg";
+           }else if (/^\d\w/g.exec(audioFile) != null){
+             subDirectory="number";
+           }else{
+             subDirectory = audioFile[0];
+           }
+         }
+       }else{
+         //console.warn(word);
+       }
+          if(subDirectory)
+           var path =  "http://media.merriam-webster.com/soundc11/"+subDirectory.toLowerCase()+"/"+audioFile;
+        // var audioElement = document.createElement('audio');
+        // audioElement.setAttribute('src', path);
+        // audioElement.play()
+        var mapObject = {
+          'sound':path,
+          'pronounciation':jsonObj.entry_list.entry?(jsonObj.entry_list.entry[0]?jsonObj.entry_list.entry[0].pr:jsonObj.entry_list.entry.pr):'',
+          'speechPart':jsonObj.entry_list.entry?(jsonObj.entry_list.entry[0]?jsonObj.entry_list.entry[0].fl:jsonObj.entry_list.entry.fl):'',
+          'mainDef':jsonObj.entry_list.entry?(jsonObj.entry_list.entry[0]?(jsonObj.entry_list.entry[0].def.dt[0]?(jsonObj.entry_list.entry[0].def?(jsonObj.entry_list.entry[0].def.dt[0].__text):jsonObj.entry_list.entry[1].def.dt[0].un.__text):(jsonObj.entry_list.entry[0].def.dt.__text)):(jsonObj.entry_list.entry.def.dt.__text)):'',
+          'word':word
+        };
+        //wordMap.set(word,mapObject);
+        $(currentElement).attr('data-content', '<div class="popup"><b>'+word+' | <span class="grey">'+mapObject.pronounciation+'</span> <span class="speechPart">&nbsp;'+mapObject.speechPart+'&nbsp;&nbsp;<i data-sound="'+path+'"class="fa fa-volume-up test" aria-hidden="true"></i></span></b><br/>&nbsp;&bull;&nbsp;<span class="definition">'+(mapObject.mainDef!=undefined?(mapObject.mainDef.split(':')[1]):null)+'</span></div>');
+
+       }
+   };
+     xmlhttp.open("GET", url, true);
+     xmlhttp.send();
+    }
+
+    //Executing these functions
+    //Declare our Videos
+      var videoIdnmbr = parent.document.URL.substring(parent.document.URL.indexOf('?videoId=') + 9, parent.document.URL.indexOf('?videoId=') + 20);
+      var tag = document.createElement('script');
+
+      tag.src = "https://www.youtube.com/iframe_api";
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+      // 3. This function creates an <iframe> (and YouTube player)
+      //    after the API code downloads.
+      var player;
+
+      function seekTo(time) {
+          player.seekTo(time);
+          newUrl = updateQueryStringParameter(window.location.toString(), "start", time);
+          window.history.pushState({
+              time: time
+          }, "Time " + time, newUrl);
+          $(window).trigger('scroller.change', {
+              scrollTo: time
+          });
+
+      }
+
+      function updateQueryStringParameter(uri, key, value) {
+          var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+          var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+          if (uri.match(re)) {
+              return uri.replace(re, '$1' + key + "=" + value + '$2');
+          } else {
+              return uri + separator + key + "=" + value;
+          }
+      }
+
+      function onYouTubeIframeAPIReady() {
+          player = new YT.Player('video', {
+              height: '360',
+              width: '640',
+              videoId: videoIdnmbr, 
+              events: {
+                  'onReady': onPlayerReady
+                      //'onStateChange': onPlayerStateChange
+              }
+          });
+      }
+
+      window.addEventListener('popstate', function(event) {
+          if (event.state && event.state.time) {
+              seekTo(event.state.time);
+          } else {
+              seekTo(0);
+          }
+      }, false);
+
+      function onPlayerReady(event) {
+          event.target.seekTo(4);
+          event.target.playVideo();
+          event.target.seekTo(4);
+          YouTubeAutoScrolledSubtitles("#player", "#infoContainer");
+      }
+
+      var done = false;
+
+      function onPlayerStateChange(event) {
+          //if (event.data == YT.PlayerState.PLAYING && !done) {}
+      }
+
+      function stopVideo() {
+          player.stopVideo();
+      }
+
+      function formatSeconds(totalSeconds) {
+          var hours = totalSeconds / 3600;
+          var minutes = (totalSeconds % 3600) / 60;
+          var seconds = (totalSeconds % 3600) % 60;
+          return hours + ":" + minutes + ":" + seconds;
+      }
+      var YouTubeAutoScrolledSubtitles = function(playerContainerSelector, scrollableContainerSelector) {
+        var playerDiv = $(playerContainerSelector).get(0);
+        var containerSelector = scrollableContainerSelector;
+        var container = $(containerSelector);
+        var scrollToTimePosition;
+        var scroller = function(time) {
+            if (!time) {
+                time = Math.round(player.getCurrentTime());
+            }
+
+            if (time > 0 && scrollToTimePosition != time) {
+                var anchor = $(containerSelector + " #" + time);
+                if (anchor.length) {
+                    scrollToTimePosition = time;
+                    var scrollTarget = anchor.data('absoluteDistanceFromTop') - container.offset().top;
+                    container.animate({
+                        scrollTop: scrollTarget
+                    }, 1000);
+                    //$('#caption-scroll-top').html(anchor.html());
+                }
+            }
+        };
+
+        $(window).bind('scroller.change', function(ev, data) {
+            scroller(data.scrollTo);
+        });
+
+        // Preparing data for scroll, savind absolute anchors position from top
+        var prepareAnchors = function() {
+            $(containerSelector + " a").each(function() {
+                $(this).data('absoluteDistanceFromTop', $(this).offset().top);
+            });
+        };
+
+        // Start scrolling
+        var scroll = function() {
+            var scrollerInterval = setInterval(function() {
+                if (player.getPlayerState() == 1) {
+                    scroller();
+                }
+            }, 1000);
+        };
+
+        prepareAnchors();
+        scroll();
+    };
+            
+
+    calcWidth();
+    retrieveCaptions(videoIdnmbr);
+    queryImages("placeholder");
+    $(document).on("click", "i", function() {
+      var audioElement = document.createElement('audio');
+      audioElement.setAttribute('src', $(this).data("sound"));
+      audioElement.play()
+    });
+    </script>
+
+
   </div>
 </body>
 </html>
