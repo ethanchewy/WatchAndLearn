@@ -4,14 +4,16 @@
   <title>Watch Video</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="font-awesome-4.6.3/css/font-awesome.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Lobster" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
   <script src="js/xml2json.min.js"></script>
 </head>
 <body>
   <div id="mainContainer">
     <a id="back-button" href="javascript:history.back()">Go Back</a>
-    <div id="video" class="videoContainer"></div>
-    <div id="infoContainer" class="embed-responsive embed-responsive-16by9 panel panel-default">
+    <div id="video" class="container"></div>
+    <div id="infoContainer">
     <div id="captions"></div>
     <!--<div id="player"></div>-->
     <script>
@@ -39,7 +41,7 @@
       jsonObj = x2js.xml_str2json( this.responseText );
       array_length = jsonObj.transcript.text.length;
       for (i = 0; i < array_length;i++){
-        total_caption = total_caption + "<a id=\"" + Math.round(jsonObj.transcript.text[i]._start) +"\""+ " href=javascript:seekTo("+   Math.round(jsonObj.transcript.text[i]._start) +");"+ ">" + jsonObj.transcript.text[i].__text + "</a>"+"<br>";
+        total_caption = total_caption + "<a id=\"" + Math.round(jsonObj.transcript.text[i]._start) +"\""+ " href=javascript:seekTo("+   Math.round(jsonObj.transcript.text[i]._start) +");"+ ">" + jsonObj.transcript.text[i].__text + "</a>"+"<br>"+"<br>";
       }
       $("#captions").append(total_caption);
 

@@ -179,6 +179,7 @@ function getOutput(item){
 	var thumb = item.snippet.thumbnails.high.url;
 	var channelTitle = item.snippet.channelTitle;
 	var videoDate = item.snippet.publishedAt;
+	var date_length = item.snippet.publishedAt.length - 14;
 
 	// Build Output String
 	var output = '<li>' +
@@ -187,7 +188,8 @@ function getOutput(item){
 	'</div>' +
 	'<div class="list-right">' +
 	'<h3><a href="view.html?videoId='+videoId+'?query='+q+'">'+title+'</a></h3>' +
-	'<small>By <span class="cTitle">'+channelTitle+'</span> on '+videoDate+'</small>' +
+	'<small>By <span class="cTitle">'+channelTitle+'</span> on '+videoDate.substring(0, date_length)+'</smavll>' +
+	'</br>' +
 	'<p>'+description+'</p>' +
 	'</div>' +
 	'</li>' +
