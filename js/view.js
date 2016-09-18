@@ -53,9 +53,9 @@ function makeItToASpan(){
      $(this).popover("show");
      $('p span').css('background-color','transparent');
         $(this).css('background-color','#ffff66');
-        if(wordMap.get($(this).text()) == null){
+       // if(wordMap.get($(this).text()) == null){
          queryDictionary($(this).text(),$(this));
-       }
+      // }
      $(this).siblings(".popover").on("mouseleave", function () {
          $(_this).popover('hide');
      });
