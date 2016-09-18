@@ -4,6 +4,7 @@ $(document).ready(function(){
     search();
   }
   $('#search-form').submit(function(e){
+  	$( "#search-form" ).remove();
     e.preventDefault();
   });
 
@@ -37,7 +38,6 @@ function search(){
 				$.each(data.items, function(i, item){
 					// Get Output
 					var output = getOutput(item);
-
 					// Display Results
 					$('#results').append(output);
 				});
