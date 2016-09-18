@@ -1,7 +1,6 @@
-var wordMap;
+ var wordMap = new Map();
 $(document).ready(function() {
 
-       wordMap = new Map();
     var videoId = parent.document.URL.substring(parent.document.URL.indexOf('?videoId=') + 9, parent.document.URL.indexOf('?videoId=') + 20);
     var videoHTML = getVideoHTML(videoId);
     calcWidth();
@@ -19,34 +18,50 @@ $(document).on("click", "i", function() {
 function makeItToASpan(){
   $('p').each(function() {
       var $this = $(this);
-      $this.html($this.text().replace(/\b(\w+)\b/g, "<span rel='popover'  data-toggle='popover' data-content=''>$1</span>"));
+      $this.html($this.text().replace(/\b(\w+)\b/g, "<span rel='popover'  data-trigger='hover' data-toggle='popover' data-content=\"<img class='loading'src='img/loading.gif'>\">$1</span>"));
   });
 
-  $('p span').each(function(){
-       if(wordMap.get($(this).text()) == null){
-        queryDictionary($(this).text(),$(this));
-      }else{
-        var mainDef = wordMap.get($(this).text()).mainDef;
-        var pr = wordMap.get($(this).text()).pronounciation;
-        var speechPart = wordMap.get($(this).text()).speechPart;;
-        var word = $(this.text())
-        $(this).attr('data-content', '<div class="popup"><b>'+word+'</b></div>');
-      }
-  });
+  // $('p span').each(function(){
+  //      if(wordMap.get($(this).text()) == null){
+  //       queryDictionary($(this).text(),$(this));
+  //     }else{
+  //       var mainDef = wordMap.get($(this).text()).mainDef;
+  //       var pr = wordMap.get($(this).text()).pronounciation;
+  //       var speechPart = wordMap.get($(this).text()).speechPart;;
+  //       var word = $(this.text())
+  //       $(this).attr('data-content', '<div class="popup"><b>'+word+'</b></div>');
+  //     }
+  // });
 
 
+    $('p span').popover({
+     html: true,
+     trigger: 'manual',
+     container: $(this).attr('id'),
+     placement: 'bottom',
+     content: function () {
+         $return = '<div class="hover-hovercard"></div>';
+     }
+ }).on("mouseenter", function () {
+     var _this = this;
+     $(this).popover("show");
+     $('p span').css('background-color','transparent');
+        $(this).css('background-color','#ffff66');
+        if(wordMap.get($(this).text()) == null){
+         queryDictionary($(this).text(),$(this));
+       }
+     $(this).siblings(".popover").on("mouseleave", function () {
+         $(_this).popover('hide');
+     });
+ }).on("mouseleave", function () {
+     var _this = this;
+     setTimeout(function () {
+         if (!$(".popover:hover").length) {
+             $(_this).popover("hide")
+         }
+     }, 100);
+ });
 
-    $('p span').on('click',function(){
-    $('p span').css('background-color','transparent');
-       $(this).css('background-color','#ffff66');
-       queryImages($(this).text());
-       //translate($(this).text());
-       queryTranslation($(this).text());
-       console.log("CALLED_TRANSLATION")
-       if(wordMap.get($(this).text()) == null){
-        queryDictionary($(this).text(),$(this));
-      }
-    });
 }
 function getVideoHTML(videoId) {
     var html = "<iframe title='YouTube video player' class='youtube-player' height='100%'id='preview-frame' src='http://www.youtube.com/embed/" + videoId + "'allowFullScreen></iframe>"
@@ -66,7 +81,7 @@ function reqListener () {
   2. append each _text property value to a "total" value
   */
   for (i = 0; i < array_length;i++){
-    total_caption += jsonObj.transcript.text[i].__text;
+    total_caption = total_caption + jsonObj.transcript.text[i].__text + '<br/>';
   }
   //console.log(total_caption);
   $("#captions").append(total_caption);
@@ -110,12 +125,12 @@ var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&tag
       var photos_lng = jsonObj.rsp.photos.photo.length;
       for (i=0; i< photos_lng;i++){
         var photo = photos[i];
+
         //console.log(photo);
         var img_src = "https://farm"+photo["_farm"] + ".staticflickr.com/"+photo["_server"] + "/"+photo["_id"] + "_"+photo["_secret"]+".jpg";
         var img_tag = "<img src='"+img_src+"' height='200' width='200'>";
         $('.popup').append(img_tag);
 
-        //console.log(img_src);
       }
 
 
@@ -156,12 +171,11 @@ function queryDictionary(word, currentElement){
       // var audioElement = document.createElement('audio');
       // audioElement.setAttribute('src', path);
       // audioElement.play()
-
       var mapObject = {
         'sound':path,
-        'pronounciation':jsonObj.entry_list.entry?(jsonObj.entry_list.entry[0]?jsonObj.entry_list.entry[0].pr:jsonObj.entry_list.entry.pr):null,
-        'speechPart':jsonObj.entry_list.entry?(jsonObj.entry_list.entry[0]?jsonObj.entry_list.entry[0].fl:jsonObj.entry_list.entry.fl):null,
-        'mainDef':jsonObj.entry_list.entry?(jsonObj.entry_list.entry[0]?(jsonObj.entry_list.entry[0].def.dt[0]?jsonObj.entry_list.entry[0].def.dt[0].__text:jsonObj.entry_list.entry[0].def.dt.__text):(jsonObj.entry_list.entry.def.dt.__text)):null,
+        'pronounciation':jsonObj.entry_list.entry?(jsonObj.entry_list.entry[0]?jsonObj.entry_list.entry[0].pr:jsonObj.entry_list.entry.pr):'',
+        'speechPart':jsonObj.entry_list.entry?(jsonObj.entry_list.entry[0]?jsonObj.entry_list.entry[0].fl:jsonObj.entry_list.entry.fl):'',
+        'mainDef':jsonObj.entry_list.entry?(jsonObj.entry_list.entry[0]?(jsonObj.entry_list.entry[0].def.dt[0]?(jsonObj.entry_list.entry[0].def?(jsonObj.entry_list.entry[0].def.dt[0].__text):jsonObj.entry_list.entry[1].def.dt[0].un.__text):(jsonObj.entry_list.entry[0].def.dt.__text)):(jsonObj.entry_list.entry.def.dt.__text)):'',
         'word':word
       };
       wordMap.set(word,mapObject);
