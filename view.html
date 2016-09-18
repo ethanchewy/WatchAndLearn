@@ -24,6 +24,9 @@
     <script>
 
       // OUR CODE
+
+      var scrollFlag = true;
+
       function makeItToASpan(){
         $('div a').each(function() {
             var $this = $(this);
@@ -57,17 +60,21 @@
                $return = '<div class="hover-hovercard"></div>';
            }
        }).on("mouseenter", function () {
+            scrollFlag = false;
            var _this = this;
            $(this).popover("show");
            $('div a span').css('background-color','transparent');
               $(this).css('background-color','#ffff66');
               //if(wordMap.get($(this).text()) == null){
+               queryImages($(this).text());
+               queryTranslation($(this).text());
                queryDictionary($(this).text(),$(this));
              //}
            $(this).siblings(".popover").on("mouseleave", function () {
                $(_this).popover('hide');
            });
        }).on("mouseleave", function () {
+          scrollFlag = true;
            var _this = this;
            setTimeout(function () {
                if (!$(".popover:hover").length) {
@@ -117,29 +124,63 @@
         calcWidth();
     });
 
-    function queryImages(word){
-        var xmlhttp = new XMLHttpRequest();
-        //var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&tags=" + word + "&api_key=ff12a1da05f0667004a7c173cfeab461&per_page=5&format=rest";
-    var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&tags=sunshine&sort=relevance&api_key=ff12a1da05f0667004a7c173cfeab461&per_page=5&format=rest";
-        xmlhttp.onreadystatechange = function() {
-         if (this.readyState == 4 && this.status == 200) {
+   function queryImages(word){
+    var xmlhttp = new XMLHttpRequest();
+    //var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&tags=" + word + "&api_key=ff12a1da05f0667004a7c173cfeab461&per_page=5&format=rest";
+var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&tags="+word+"&sort=relevance&api_key=ff12a1da05f0667004a7c173cfeab461&per_page=5&format=rest";
+    xmlhttp.onreadystatechange = function() {
+     if (this.readyState == 4 && this.status == 200) {
 
-          var x2js = new X2JS();
-          var jsonObj = x2js.xml_str2json( this.responseText );
-          var photos = jsonObj.rsp.photos.photo;
-          var photos_lng = jsonObj.rsp.photos.photo.length;
-          for (i=0; i< photos_lng;i++){
-            var photo = photos[i];
-            var img_src = "https://farm"+photo["_farm"] + ".staticflickr.com/"+photo["_server"] + "/"+photo["_id"] + "_"+photo["_secret"]+".jpg";
-          }
+      var x2js = new X2JS();
+      var jsonObj = x2js.xml_str2json( this.responseText );
+      var photos = jsonObj.rsp.photos.photo;
+      var photos_lng = jsonObj.rsp.photos.photo.length;
+      for (i=0; i< photos_lng;i++){
+        var photo = photos[i];
+
+        //console.log(photo);
+        var img_src = "https://farm"+photo["_farm"] + ".staticflickr.com/"+photo["_server"] + "/"+photo["_id"] + "_"+photo["_secret"]+".jpg";
+        var img_tag = "<img src='"+img_src+"' height='200' width='200'>";
+        $('.popup').append(img_tag);
+
+      }
+   }
+
+  };
+  xmlhttp.open("GET", url, true);
+  xmlhttp.send();
+}
 
 
-       }
+function queryTranslation(word){
+  console.log("ENTERED_TRANSLATION");
+   var xmlhttp = new XMLHttpRequest();
+   //replace the destination language with user's native language
+   
+   var url = "https://translate.yandex.net/api/v1.5/tr.json/translate?key=trnsl.1.1.20160917T195632Z.2f34ef1b4e3cda55.b0ee170e6af547187486da49007ce5d938ddbe78&text="+word+"&lang=es";
 
-      };
-      xmlhttp.open("GET", url, true);
-      xmlhttp.send();
-    }
+   xmlhttp.onreadystatechange = function() {
+
+     if (this.readyState == 4 && this.status == 200) {
+        
+        var responseText = this.responseText;
+
+
+        var jsonObj = JSON.parse(this.responseText);
+        var text = jsonObj.text
+
+        $('.translation').text(text);
+     }
+     else{
+
+     }
+
+   }
+
+   xmlhttp.open("GET", url, true);
+   xmlhttp.send();
+}
+
 
     function queryDictionary(word,currentElement){
       var xmlhttp = new XMLHttpRequest();
@@ -180,7 +221,10 @@
           'word':word
         };
         //wordMap.set(word,mapObject);
-        $(currentElement).attr('data-content', '<div class="popup"><b>'+word+' | <span class="grey">'+mapObject.pronounciation+'</span> <span class="speechPart">&nbsp;'+mapObject.speechPart+'&nbsp;&nbsp;<i data-sound="'+path+'"class="fa fa-volume-up test" aria-hidden="true"></i></span></b><br/>&nbsp;&bull;&nbsp;<span class="definition">'+(mapObject.mainDef!=undefined?(mapObject.mainDef.split(':')[1]):null)+'</span></div>');
+       
+
+        $(currentElement).attr('data-content', '<div class="popup"><b>'+word+' | <span class="grey">n'+mapObject.pronounciation+'</span> <span class="speechPart">&nbsp;'+mapObject.speechPart+'&nbsp;&nbsp;<i data-sound="'+path+'"class="fa fa-volume-up test" aria-hidden="true"></i></span></b>&nbsp<span class="translation"></span><br/>&nbsp;&bull;&nbsp;<span class="definition">'+(mapObject.mainDef!=undefined?(mapObject.mainDef.split(':')[1]):null)+'</span></div>');
+
 
        }
    };
@@ -303,7 +347,7 @@
         // Start scrolling
         var scroll = function() {
             var scrollerInterval = setInterval(function() {
-                if (player.getPlayerState() == 1) {
+                if (player.getPlayerState() == 1 && scrollFlag) {
                     scroller();
                 }
             }, 1000);
