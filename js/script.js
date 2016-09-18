@@ -15,7 +15,6 @@ $(document).ready(function(){
 
 
 function search(){
-  console.log('search bar ');
 	// Clear Results
 	$('#results').html('');
 	$('#buttons').html('');
@@ -34,9 +33,7 @@ function search(){
 				var nextPageToken = data.nextPageToken;
 				var prevPageToken = data.prevPageToken;
 
-				// Log Data
-				console.log(data);
-
+				
 				$.each(data.items, function(i, item){
 					// Get Output
 					var output = getOutput(item);

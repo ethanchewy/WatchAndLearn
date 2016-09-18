@@ -260,3 +260,33 @@ nav .searchForm{
   box-shadow: 10px 10px 21px -6px rgba(207,207,207,1);
 
 }
+
+.popup{
+  font-family: 'Raleway',sans-serif;
+  padding: 5px;
+  display: inline;
+}
+.popup b{
+  display: inline;
+}
+.grey{
+  color: #ccc;
+  font-weight: lighter;
+  /*float: right;*/
+}
+.speechPart{
+  color: #000;
+  font-weight: normal;
+}
+.definition{
+  font-size: 12px;
+  width: 100%;
+  text-align: justify;
+}
+.fa-volume-up{
+  cursor: pointer;
+}
+.loading{
+  width: 60px;
+  height: 40px;
+}

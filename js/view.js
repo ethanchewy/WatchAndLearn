@@ -1,50 +1,72 @@
+ var wordMap = new Map();
 $(document).ready(function() {
-    //console.log(YTPlayer.getCurrentTime());
-    /*
+
     var videoId = parent.document.URL.substring(parent.document.URL.indexOf('?videoId=') + 9, parent.document.URL.indexOf('?videoId=') + 20);
     var videoHTML = getVideoHTML(videoId);
     calcWidth();
+
     $("#video").append(videoHTML);
     retrieveCaptions(videoId);
     queryImages("placeholder");
-  */
-    //fetchTime();
 
 });
-  var ytplayer;
-
-  function onYouTubePlayerAPIReady() {
-    ytplayer = new YT.Player('player', {
-    height: '390',
-    width: '640',
-    videoId: 'M7lc1UVf-VE',
-    events: {
-      //'onReady': onPlayerReady,
-      //'onStateChange': onPlayerStateChange
-    }});
-    var time = ytplayer.getCurrentTime();
-    alert(time);
-  }
-  
-  
-
-  
-  
-
+$(document).on("click", "i", function() {
+  var audioElement = document.createElement('audio');
+  audioElement.setAttribute('src', $(this).data("sound"));
+  audioElement.play()
+});
 
 function makeItToASpan(){
-  console.log("make_span");
   $('p').each(function() {
       var $this = $(this);
-      console.log($this);
-      $this.html($this.text().replace(/\b(\w+)\b/g, "<span>$1</span>"));
+      $this.html($this.text().replace(/\b(\w+)\b/g, "<span rel='popover'  data-trigger='hover' data-toggle='popover' data-content=\"<img class='loading'src='img/loading.gif'>\">$1</span>"));
   });
 
-    $('p span').on('click',function(){
-    $('p span').css('background-color','transparent');
-       $(this).css('background-color','#ffff66');
-       queryDictionary($(this).text())
-    });
+  // $('p span').each(function(){
+  //      if(wordMap.get($(this).text()) == null){
+  //       queryDictionary($(this).text(),$(this));
+  //     }else{
+  //       var mainDef = wordMap.get($(this).text()).mainDef;
+  //       var pr = wordMap.get($(this).text()).pronounciation;
+  //       var speechPart = wordMap.get($(this).text()).speechPart;;
+  //       var word = $(this.text())
+  //       $(this).attr('data-content', '<div class="popup"><b>'+word+'</b></div>');
+  //     }
+  // });
+
+
+
+    // $('p span').hover(function(){
+
+    // });
+
+    $('p span').popover({
+     html: true,
+     trigger: 'manual',
+     container: $(this).attr('id'),
+     placement: 'bottom',
+     content: function () {
+         $return = '<div class="hover-hovercard"></div>';
+     }
+ }).on("mouseenter", function () {
+     var _this = this;
+     $(this).popover("show");
+     $('p span').css('background-color','transparent');
+        $(this).css('background-color','#ffff66');
+        if(wordMap.get($(this).text()) == null){
+         queryDictionary($(this).text(),$(this));
+       }
+     $(this).siblings(".popover").on("mouseleave", function () {
+         $(_this).popover('hide');
+     });
+ }).on("mouseleave", function () {
+     var _this = this;
+     setTimeout(function () {
+         if (!$(".popover:hover").length) {
+             $(_this).popover("hide")
+         }
+     }, 100);
+ });
 }
 function getVideoHTML(videoId) {
     var html = "<iframe title='YouTube video player' class='youtube-player' height='100%'id='preview-frame' src='http://www.youtube.com/embed/" + videoId + "'allowFullScreen></iframe>"
@@ -59,20 +81,18 @@ function reqListener () {
   jsonObj = x2js.xml_str2json( this.responseText );
   array_length = jsonObj.transcript.text.length;
   //filtered_data = JSON.parse(jsonObj);
-    // console.log(this.responseText);
-    // console.log(jsonObj);
-    // console.log(jsonObj.length);
-    // console.log(jsonObj.transcript.text.length);
     /*
   1. for loop to parse through each object (Obj. 1, 2, 3)
   2. append each _text property value to a "total" value
   */
   for (i = 0; i < array_length;i++){
-    total_caption += jsonObj.transcript.text[i].__text;
+    total_caption = total_caption + jsonObj.transcript.text[i].__text + '<br/>';
   }
   //console.log(total_caption);
   $("#captions").append(total_caption);
   makeItToASpan();
+  $('[data-toggle="popover"]').popover({html:true});
+
 
 }
 function retrieveCaptions(videoId){
@@ -110,9 +130,7 @@ var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&tag
       var photos_lng = jsonObj.rsp.photos.photo.length;
       for (i=0; i< photos_lng;i++){
         var photo = photos[i];
-        console.log(photo);
         var img_src = "https://farm"+photo["_farm"] + ".staticflickr.com/"+photo["_server"] + "/"+photo["_id"] + "_"+photo["_secret"]+".jpg";
-        console.log(img_src);
       }
 
 
@@ -123,19 +141,18 @@ var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&tag
   xmlhttp.send();
 }
 
-function queryDictionary(word){
+function queryDictionary(word, currentElement){
   var xmlhttp = new XMLHttpRequest();
-
   var url = "https://crossorigin.me/http://www.dictionaryapi.com/api/v1/references/learners/xml/"+word+"?key=eaf69752-c354-4489-8cc6-99948b85a285";
 
  xmlhttp.onreadystatechange = function() {
      if (this.readyState == 4 && this.status == 200) {
          var x2js = new X2JS();
          var jsonObj = x2js.xml_str2json( this.responseText );
-        //  console.warn(jsonObj.entry_list.entry);
-         if(jsonObj.entry_list.entry)
-         var audioFile = jsonObj.entry_list.entry.sound?jsonObj.entry_list.entry.sound.wav:jsonObj.entry_list.entry[0].sound.wav;
+         if(jsonObj.entry_list.entry){
+         var audioFile = jsonObj.entry_list.entry[0]?(jsonObj.entry_list.entry[0].sound?jsonObj.entry_list.entry[0].sound.wav:null):(jsonObj.entry_list.entry.sound?jsonObj.entry_list.entry.sound.wav:null);//null;//jsonObj.entry_list.entry[0]?(jsonObj.entry_list.entry.sound?jsonObj.entry_list.entry.sound.wav:jsonObj.entry_list.entry[0].sound.wav):jsonObj.entry_list.entry.sound.wav;
          var subDirectory = "";
+         if(audioFile){
          if(audioFile.indexOf('bix') == 0){
            subDirectory = "bix";
          }else if (audioFile.indexOf('gg') == 0){
@@ -145,11 +162,25 @@ function queryDictionary(word){
          }else{
            subDirectory = audioFile[0];
          }
+       }
+     }else{
+       //console.warn(word);
+     }
+        if(subDirectory)
          var path =  "http://media.merriam-webster.com/soundc11/"+subDirectory.toLowerCase()+"/"+audioFile;
-      var audioElement = document.createElement('audio');
-      audioElement.setAttribute('src', path);
-      audioElement.play();
-     // console.log(this.responseText);
+      // var audioElement = document.createElement('audio');
+      // audioElement.setAttribute('src', path);
+      // audioElement.play()
+      var mapObject = {
+        'sound':path,
+        'pronounciation':jsonObj.entry_list.entry?(jsonObj.entry_list.entry[0]?jsonObj.entry_list.entry[0].pr:jsonObj.entry_list.entry.pr):'',
+        'speechPart':jsonObj.entry_list.entry?(jsonObj.entry_list.entry[0]?jsonObj.entry_list.entry[0].fl:jsonObj.entry_list.entry.fl):'',
+        'mainDef':jsonObj.entry_list.entry?(jsonObj.entry_list.entry[0]?(jsonObj.entry_list.entry[0].def.dt[0]?(jsonObj.entry_list.entry[0].def?(jsonObj.entry_list.entry[0].def.dt[0].__text):jsonObj.entry_list.entry[1].def.dt[0].un.__text):(jsonObj.entry_list.entry[0].def.dt.__text)):(jsonObj.entry_list.entry.def.dt.__text)):'',
+        'word':word
+      };
+      wordMap.set(word,mapObject);
+      $(currentElement).attr('data-content', '<div class="popup"><b>'+word+' | <span class="grey">'+mapObject.pronounciation+'</span> <span class="speechPart">&nbsp;'+mapObject.speechPart+'&nbsp;&nbsp;<i data-sound="'+path+'"class="fa fa-volume-up test" aria-hidden="true"></i></span></b><br/>&nbsp;&bull;&nbsp;<span class="definition">'+(mapObject.mainDef!=undefined?(mapObject.mainDef.split(':')[1]):null)+'</span></div>');
+
      }
  };
  xmlhttp.open("GET", url, true);
