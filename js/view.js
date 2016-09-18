@@ -7,7 +7,6 @@ $(document).ready(function() {
 
     $("#video").append(videoHTML);
     retrieveCaptions(videoId);
-    queryImages("placeholder");
 
 });
 $(document).on("click", "i", function() {
@@ -34,11 +33,6 @@ function makeItToASpan(){
   //     }
   // });
 
-
-
-    // $('p span').hover(function(){
-
-    // });
 
     $('p span').popover({
      html: true,
@@ -67,6 +61,7 @@ function makeItToASpan(){
          }
      }, 100);
  });
+
 }
 function getVideoHTML(videoId) {
     var html = "<iframe title='YouTube video player' class='youtube-player' height='100%'id='preview-frame' src='http://www.youtube.com/embed/" + videoId + "'allowFullScreen></iframe>"
@@ -98,9 +93,9 @@ function reqListener () {
 function retrieveCaptions(videoId){
 
   var x2js,
-  	jsonObj,
-  	array_length,
-  	filtered_data;
+    jsonObj,
+    array_length,
+    filtered_data;
     var oReq = new XMLHttpRequest();
 oReq.addEventListener("load", reqListener);
 oReq.open("GET", "https://video.google.com/timedtext?lang=en&v=" + videoId);
@@ -120,7 +115,7 @@ $(window).resize(function() {
 function queryImages(word){
     var xmlhttp = new XMLHttpRequest();
     //var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&tags=" + word + "&api_key=ff12a1da05f0667004a7c173cfeab461&per_page=5&format=rest";
-var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&tags=sunshine&sort=relevance&api_key=ff12a1da05f0667004a7c173cfeab461&per_page=5&format=rest";
+var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&tags="+word+"&sort=relevance&api_key=ff12a1da05f0667004a7c173cfeab461&per_page=5&format=rest";
     xmlhttp.onreadystatechange = function() {
      if (this.readyState == 4 && this.status == 200) {
 
@@ -130,7 +125,12 @@ var url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&tag
       var photos_lng = jsonObj.rsp.photos.photo.length;
       for (i=0; i< photos_lng;i++){
         var photo = photos[i];
+
+        //console.log(photo);
         var img_src = "https://farm"+photo["_farm"] + ".staticflickr.com/"+photo["_server"] + "/"+photo["_id"] + "_"+photo["_secret"]+".jpg";
+        var img_tag = "<img src='"+img_src+"' height='200' width='200'>";
+        $('.popup').append(img_tag);
+
       }
 
 
@@ -179,10 +179,44 @@ function queryDictionary(word, currentElement){
         'word':word
       };
       wordMap.set(word,mapObject);
-      $(currentElement).attr('data-content', '<div class="popup"><b>'+word+'<span class="grey"> |&nbsp;'+(mapObject.pronounciation==''?'':mapObject.pronounciation)+'</span> <span class="speechPart">&nbsp;'+mapObject.speechPart+'&nbsp;&nbsp;<i data-sound="'+path+'"class="fa fa-volume-up test" aria-hidden="true"></i></span></b><br/>&nbsp;&bull;&nbsp;<span class="definition">'+(mapObject.mainDef!=undefined?(mapObject.mainDef.split(':')[1]):null)+'</span></div>');
+      $(currentElement).attr('data-content', '<div class="popup"><b>'+word+'<span class="grey"> |&nbsp;'+(mapObject.pronounciation==''?'':mapObject.pronounciation)+'</span> <span class="speechPart">&nbsp;'+mapObject.speechPart+'&nbsp;&nbsp;<i data-sound="'+path+'"class="fa fa-volume-up test" aria-hidden="true"></i></span></b><br/>&nbsp<span class="translation"></span><br/>&nbsp;&bull;&nbsp;<span class="definition">'+(mapObject.mainDef!=undefined?(mapObject.mainDef.split(':')[1]):null)+'</span></div>');
 
      }
  };
  xmlhttp.open("GET", url, true);
  xmlhttp.send();
+}
+
+
+
+
+function queryTranslation(word){
+  console.log("ENTERED_TRANSLATION");
+   var xmlhttp = new XMLHttpRequest();
+   //replace the destination language with user's native language
+
+   var url = "https://translate.yandex.net/api/v1.5/tr.json/translate?key=trnsl.1.1.20160917T195632Z.2f34ef1b4e3cda55.b0ee170e6af547187486da49007ce5d938ddbe78&text="+word+"&lang=es";
+
+   xmlhttp.onreadystatechange = function() {
+    console.log("RECIEVED_RESULT")
+     if (this.readyState == 4 && this.status == 200) {
+
+        var responseText = this.responseText;
+        console.log("responseText: " + responseText);
+
+        var jsonObj = JSON.parse(this.responseText);
+        var text = jsonObj.text
+        console.log("yessir: " + text);
+
+        $('.translation').text(text);
+     }
+     else{
+      console.log("STATUS: " + this.status);
+      console.log("TRANSLATION_ERR");
+     }
+
+   }
+
+   xmlhttp.open("GET", url, true);
+   xmlhttp.send();
 }

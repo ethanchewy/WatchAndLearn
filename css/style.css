@@ -264,6 +264,10 @@ nav .searchForm{
 
 }
 
+.popover-content{
+  overflow-y:auto;
+  height:200px;
+}
 .popup{
   font-family: 'Raleway',sans-serif;
   padding: 5px;
@@ -272,6 +276,12 @@ nav .searchForm{
 }
 .popup b{
   display: inline;
+
+}
+
+.translation{
+  font-style: italic;
+  font-weight: lighter;
 }
 .grey{
   color: #ccc;
