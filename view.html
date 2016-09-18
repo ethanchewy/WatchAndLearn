@@ -11,24 +11,24 @@
   <div id="mainContainer">
     <a id="back-button" href="javascript:history.back()">Go Back</a>
     <div id="video" class="videoContainer"></div>
-    <div id="infoContainer">
+    <div id="infoContainer" class="embed-responsive embed-responsive-16by9 panel panel-default">
     <div id="captions"></div>
     <!--<div id="player"></div>-->
     <script>
 
       // OUR CODE
       function makeItToASpan(){
-        console.log("make_span");
-        $('p a').each(function() {
+        $('div a').each(function() {
             var $this = $(this);
             $this.html($this.text().replace(/\b(\w+)\b/g, "<span>$1</span>"));
         });
 
-        $('p a span').on('click',function(){
-        $('p a span').css('background-color','transparent');
+        $('div a span').on('click',function(){
+        $('div a span').css('background-color','transparent');
            $(this).css('background-color','#ffff66');
            queryDictionary($(this).text())
         });
+
     }
 
 
@@ -39,12 +39,17 @@
       jsonObj = x2js.xml_str2json( this.responseText );
       array_length = jsonObj.transcript.text.length;
       for (i = 0; i < array_length;i++){
-        total_caption = total_caption + "<a name=\"" + jsonObj.transcript.text[i]._start +"\""+ " href=javascript:seekTo("+  jsonObj.transcript.text[i]._start +");"+ ">" + jsonObj.transcript.text[i].__text + "</a>"+"<br>";
-        console.log(total_caption);
+        total_caption = total_caption + "<a id=\"" + Math.round(jsonObj.transcript.text[i]._start) +"\""+ " href=javascript:seekTo("+   Math.round(jsonObj.transcript.text[i]._start) +");"+ ">" + jsonObj.transcript.text[i].__text + "</a>"+"<br>";
       }
-      console.log(total_caption);
       $("#captions").append(total_caption);
+
+
       makeItToASpan();
+      
+      var myElement = document.getElementById('152.13');
+      var topPos = myElement.offsetTop;
+      document.getElementById('infoContainer').scrollTop = topPos;
+      alert("sdf");
 
     }
     function retrieveCaptions(videoId){
@@ -82,9 +87,7 @@
           var photos_lng = jsonObj.rsp.photos.photo.length;
           for (i=0; i< photos_lng;i++){
             var photo = photos[i];
-            console.log(photo);
             var img_src = "https://farm"+photo["_farm"] + ".staticflickr.com/"+photo["_server"] + "/"+photo["_id"] + "_"+photo["_secret"]+".jpg";
-            console.log(img_src);
           }
 
 
@@ -104,7 +107,6 @@
          if (this.readyState == 4 && this.status == 200) {
              var x2js = new X2JS();
              var jsonObj = x2js.xml_str2json( this.responseText );
-            //  console.warn(jsonObj.entry_list.entry);
              if(jsonObj.entry_list.entry)
              var audioFile = jsonObj.entry_list.entry.sound?jsonObj.entry_list.entry.sound.wav:jsonObj.entry_list.entry[0].sound.wav;
              var subDirectory = "";
@@ -121,7 +123,6 @@
           var audioElement = document.createElement('audio');
           audioElement.setAttribute('src', path);
           audioElement.play();
-         // console.log(this.responseText);
          }
      };
      xmlhttp.open("GET", url, true);
@@ -133,132 +134,133 @@
       var videoIdnmbr = parent.document.URL.substring(parent.document.URL.indexOf('?videoId=') + 9, parent.document.URL.indexOf('?videoId=') + 20);
       var tag = document.createElement('script');
 
-            tag.src = "https://www.youtube.com/iframe_api";
-            var firstScriptTag = document.getElementsByTagName('script')[0];
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      tag.src = "https://www.youtube.com/iframe_api";
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-            // 3. This function creates an <iframe> (and YouTube player)
-            //    after the API code downloads.
-            var player;
+      // 3. This function creates an <iframe> (and YouTube player)
+      //    after the API code downloads.
+      var player;
 
-            function seekTo(time) {
-                player.seekTo(time);
-                newUrl = updateQueryStringParameter(window.location.toString(), "start", time);
-                window.history.pushState({
-                    time: time
-                }, "Time " + time, newUrl);
-                $(window).trigger('scroller.change', {
-                    scrollTo: time
-                });
+      function seekTo(time) {
+          player.seekTo(time);
+          newUrl = updateQueryStringParameter(window.location.toString(), "start", time);
+          window.history.pushState({
+              time: time
+          }, "Time " + time, newUrl);
+          $(window).trigger('scroller.change', {
+              scrollTo: time
+          });
 
+      }
+
+      function updateQueryStringParameter(uri, key, value) {
+          var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+          var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+          if (uri.match(re)) {
+              return uri.replace(re, '$1' + key + "=" + value + '$2');
+          } else {
+              return uri + separator + key + "=" + value;
+          }
+      }
+
+      function onYouTubeIframeAPIReady() {
+          player = new YT.Player('video', {
+              height: '360',
+              width: '640',
+              videoId: videoIdnmbr, 
+              events: {
+                  'onReady': onPlayerReady
+                      //'onStateChange': onPlayerStateChange
+              }
+          });
+      }
+
+      window.addEventListener('popstate', function(event) {
+          if (event.state && event.state.time) {
+              seekTo(event.state.time);
+          } else {
+              seekTo(0);
+          }
+      }, false);
+
+      function onPlayerReady(event) {
+          event.target.seekTo(4);
+          event.target.playVideo();
+          event.target.seekTo(4);
+          YouTubeAutoScrolledSubtitles("#player", "#infoContainer");
+      }
+
+      var done = false;
+
+      function onPlayerStateChange(event) {
+          //if (event.data == YT.PlayerState.PLAYING && !done) {}
+      }
+
+      function stopVideo() {
+          player.stopVideo();
+      }
+
+      function formatSeconds(totalSeconds) {
+          var hours = totalSeconds / 3600;
+          var minutes = (totalSeconds % 3600) / 60;
+          var seconds = (totalSeconds % 3600) % 60;
+          return hours + ":" + minutes + ":" + seconds;
+      }
+      var YouTubeAutoScrolledSubtitles = function(playerContainerSelector, scrollableContainerSelector) {
+        var playerDiv = $(playerContainerSelector).get(0);
+        var containerSelector = scrollableContainerSelector;
+        var container = $(containerSelector);
+        var scrollToTimePosition;
+        var scroller = function(time) {
+            if (!time) {
+                time = Math.round(player.getCurrentTime());
             }
 
-            function updateQueryStringParameter(uri, key, value) {
-                var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
-                var separator = uri.indexOf('?') !== -1 ? "&" : "?";
-                if (uri.match(re)) {
-                    return uri.replace(re, '$1' + key + "=" + value + '$2');
-                } else {
-                    return uri + separator + key + "=" + value;
-                }
-            }
-
-            function onYouTubeIframeAPIReady() {
-                player = new YT.Player('video', {
-                    height: '360',
-                    width: '640',
-                    videoId: videoIdnmbr, 
-                    events: {
-                        'onReady': onPlayerReady
-                            //'onStateChange': onPlayerStateChange
-                    }
-                });
-            }
-
-            window.addEventListener('popstate', function(event) {
-                if (event.state && event.state.time) {
-                    seekTo(event.state.time);
-                } else {
-                    seekTo(0);
-                }
-            }, false);
-
-            function onPlayerReady(event) {
-                event.target.seekTo(4);
-                event.target.playVideo();
-                event.target.seekTo(4);
-                YouTubeAutoScrolledSubtitles("#video", "#captions");
-            }
-
-            var done = false;
-
-            function onPlayerStateChange(event) {
-                //if (event.data == YT.PlayerState.PLAYING && !done) {}
-            }
-
-            function stopVideo() {
-                player.stopVideo();
-            }
-
-            function formatSeconds(totalSeconds) {
-                var hours = totalSeconds / 3600;
-                var minutes = (totalSeconds % 3600) / 60;
-                var seconds = (totalSeconds % 3600) % 60;
-                return hours + ":" + minutes + ":" + seconds;
-            }
-
-            var YouTubeAutoScrolledSubtitles = function(playerContainerSelector, scrollableContainerSelector) {
-                var playerDiv = $(playerContainerSelector).get(0);
-                var containerSelector = scrollableContainerSelector;
-                var container = $(containerSelector);
-                var scrollToTimePosition;
-                var scroller = function(time) {
-                    if (!time) {
-                        time = Math.round(player.getCurrentTime());
-                        console.log(time);
-                    }
-
-                    if (time > 0 && scrollToTimePosition != time) {
-                        var anchor = $(containerSelector + " a[name=" + time + "]");
-                        if (anchor.length) {
-                            scrollToTimePosition = time;
-                            var scrollTarget = anchor.data('absoluteDistanceFromTop') - container.offset().top;
-                            container.animate({
-                                scrollTop: scrollTarget
-                            }, 1000);
-                            //$('#caption-scroll-top').html(anchor.html());
-                        }
-                    }
-                };
-
-                $(window).bind('scroller.change', function(ev, data) {
-                    scroller(data.scrollTo);
-                });
-
-                // Preparing data for scroll, savind absolute anchors position from top
-                var prepareAnchors = function() {
-                    $(containerSelector + " a").each(function() {
-                        $(this).data('absoluteDistanceFromTop', $(this).offset().top);
-                    });
-                };
-
-                // Start scrolling
-                var scroll = function() {
-                    var scrollerInterval = setInterval(function() {
-                        if (player.getPlayerState() == 1) {
-                            scroller();
-                        }
+            if (time > 0 && scrollToTimePosition != time) {
+                var anchor = $(containerSelector + " #" + time);
+                if (anchor.length) {
+                    scrollToTimePosition = time;
+                    var scrollTarget = anchor.data('absoluteDistanceFromTop') - container.offset().top;
+                    container.animate({
+                        scrollTop: scrollTarget
                     }, 1000);
-                };
+                    //$('#caption-scroll-top').html(anchor.html());
+                }
+            }
+        };
 
-                prepareAnchors();
-                scroll();
-            };
+        $(window).bind('scroller.change', function(ev, data) {
+            scroller(data.scrollTo);
+        });
+
+        // Preparing data for scroll, savind absolute anchors position from top
+        var prepareAnchors = function() {
+            $(containerSelector + " a").each(function() {
+                $(this).data('absoluteDistanceFromTop', $(this).offset().top);
+            });
+        };
+
+        // Start scrolling
+        var scroll = function() {
+            var scrollerInterval = setInterval(function() {
+                if (player.getPlayerState() == 1) {
+                    scroller();
+                }
+            }, 1000);
+        };
+
+        prepareAnchors();
+        scroll();
+    };
+            
+
     calcWidth();
     retrieveCaptions(videoIdnmbr);
     queryImages("placeholder");
     </script>
-    </div>
+
+
   </div>
 </body>
 </html>
