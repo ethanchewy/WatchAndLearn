@@ -282,6 +282,8 @@ nav .searchForm{
 .translation{
   font-style: italic;
   font-weight: lighter;
+  text-align: right;
+
 }
 .grey{
   color: #ccc;
@@ -303,4 +305,9 @@ nav .searchForm{
 .loading{
   width: 60px;
   height: 40px;
+}
+.popup_img{
+  margin-bottom:5px;
+  position: relative;
+  width: 100%;
 }
