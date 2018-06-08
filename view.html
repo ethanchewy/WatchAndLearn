@@ -194,7 +194,7 @@ function queryTranslation(word,currentElement){
     function queryDictionary(word,currentElement){
       var xmlhttp = new XMLHttpRequest();
 
-      var url = "http://www.dictionaryapi.com/api/v1/references/learners/xml/"+word+"?key=eaf69752-c354-4489-8cc6-99948b85a285";
+      var url = "https://www.dictionaryapi.com/api/v1/references/learners/xml/"+word+"?key=eaf69752-c354-4489-8cc6-99948b85a285";
 
      xmlhttp.onreadystatechange = function() {
        if (this.readyState == 4 && this.status == 200) {
